@@ -1,0 +1,70 @@
+<%- include ("./partials/headers.ejs") %>
+
+<div class="container">
+    <div class="row">
+        <div class="col-sm-5 mt-5">
+            <div class="alert alert-info text-center" role="alert">
+                Add a Student
+              </div>
+            <form method="post" action="/student/">
+              <div class="mb-3">
+                <label for="name" class="form-label">Name</label>
+                <input type="text" class="form-control" id="name" name="name"  placeholder="">
+              </div>
+              <div class="mb-3">
+                <label for="age" class="form-label">Age</label>
+                <input type="number" class="form-control" id="age" name="age" placeholder="">
+              </div>
+              <div class="mb-3">
+                <label for="fees" class="form-label">Fees</label>
+                <input type="number" class="form-control" id="fees" name="fees" placeholder="">
+              </div>
+              <div class="col-auto">
+                <button type="submit" class="btn btn-secondary mb-3">Submit</button>
+              </div>
+            </form>
+            
+              
+        </div>
+        <div class="col-sm-1 mt-5">
+
+        </div>
+        <div class="col-sm-6 mt-5" >
+            <div class="alert alert-danger text-center" role="alert">
+               All Students
+              </div>
+            <table class="table table-dark table-striped">
+                <thead>
+                    <tr>
+                      <th scope="col">Id</th>
+                      <th scope="col">Name</th>
+                      <th scope="col">Age</th>
+                      <th scope="col">Fees</th>
+                      <th scope="col">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% var i=1 %>
+                    <% allData.forEach((doc)=>{%>
+                      <tr>
+                        <th scope="row"><%= i%></th>
+                        <td><%= doc.name %></td>
+                        <td><%= doc.age %></td>
+                        <td><%= doc.fees %></td>
+                        <td flex-row><form method="get" action="/student/edit/<%= doc._id %> "
+                          class="d-inline">
+                          <button type="submit"><i class='fas fa-pen-square text-info ml-2' ></i></button></form>
+                          <form method="get" action="/student/delete/<%= doc._id %>" class="d-inline">
+                            <button type="submit"><i class='fas fa-trash text-danger ml-3'></i></td></button></form>
+                            
+                      </tr>
+                      <% i=i+1 %>
+                    <% })%>
+                   
+                  </tbody>
+              </table>
+        </div>
+    </div>
+</div>
+
+ <%- include ("./partials/footers.ejs") %>
