@@ -8,7 +8,7 @@ const studentSchema=mongoose.Schema({
 })
 
 const StudentModel = mongoose.model('student',studentSchema)
-console.log(StudentModel)
+
 
 export default StudentModel
     

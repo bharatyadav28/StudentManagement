@@ -1,16 +1,14 @@
-import mongoose from 'mongoose'
-import {join} from 'path'
 import md5 from 'md5'
 import bcrypt, { hash } from 'bcrypt'
+import passport from 'passport'
+import session from 'express-session'
 
 import userModel from '../models/user.js'
-import IndexController from './indexController.js'
-
 
 
 class AuthController{
-    static saltRounds = 10
-   
+
+    // Render signup page for get request
     static signup = async(req,res)=>{
         try{
             res.render("signup.ejs")
@@ -19,39 +17,21 @@ class AuthController{
         }
     }
         
-
-    static adduser = async(req, res) => {
-        
-        try{
-            const {name,age,email,password}=req.body
-        
-            bcrypt.hash(req.body.password, this.saltRounds, async(err, hash)=>{
-            console.log(hash)
-            const userDoc = new userModel({
-                name:name,
-                age:age,
-                email:email,
-                // password:md5(password) // hashing using md5 hash function
-                password:hash             // hashing using bcrypt hash function with salt rounds
-
+    // Add the user with in the database
+    static adduser = async(req, res) => {  
+        userModel.register({username:req.body.username},req.body.password, async function(err,user){
+            if(err){
+                console.log(err)
+                res.redirect('/')
+            }
+                 passport.authenticate("local")(req, res, function(){
+                        res.redirect("/student");
+                      });
             })
-            await userDoc.save()
-            console.log("Users")
-            IndexController.allstudents(req,res)
-
-            });
-            
-          
-            
-            
-            
-
-        }catch(err){
-            console.log(err)
-
         }
-        
-    }
+
+       
+    // Render login page for get request
     static login = async(req,res)=>{
         try{
             res.render("login.ejs",{loginerror:""})
@@ -59,43 +39,47 @@ class AuthController{
             console.log(error)
         }
     }
+
+    // Authenticate the User
     static loginauth = async(req,res)=>{
-        
-            // const {username,password}=req.body
-            const username = req.body.username
-            // const password = md5(req.body.password) // decoding gor mdf hashed password
-            const password = (req.body.password)
 
-          
+            const user = new userModel({
+                username : req.body.username,
+                password : req.body.password
 
-
-        //    const result =  await userModel.findOne({email:username})
-        userModel.findOne({email:username},async(err,result)=>{
-
-            if(err){
-                console.log(err)
-            }
-            else{
-                if(result){
-                    if( await bcrypt.compare(password, result.password)){
-                        const isLogged = true
-                        IndexController.allstudents(req,res,isLogged)
-                    }else{
-                        res.render("login.ejs",{loginerror:"Wrong Password!!!"})
-                    }
-                }else{
-                    res.render("login.ejs",{loginerror:"This email id is not registered!!!"})
-
-                }
-                
-                
-            }
-        })
+            })
             
 
-       
-    }
-    
+             req.login(user,function(err){
+               
+                if(err){
+                    console.log(err)
+                    return res.redirect('/',{loginerror:"Wrong username or password"})
+                }else{
+                   const  result =  passport.authenticate("local")(req, res, function(){    
+                        return res.redirect("/student");
+                      });  
+                             
+                }
+            })
+           
+         }
+
+
+    // logOut the logged user
+    static log_out = async(req,res)=>{
+        if (req.isAuthenticated()){
+            req.logout(function(err){
+                if(err){
+                    console.log(err)
+                }else{
+                        req.session.destroy()
+                        res.redirect("/");
+                }         
+            })
+        }   
+    }  
+     
 }
 
 
